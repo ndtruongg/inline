@@ -8,7 +8,7 @@ export const useSeo = () => {
     const config = useRuntimeConfig()
     const route = useRoute()
 
-    const baseUrl = 'https://tipshub.net'
+    const baseUrl = 'https://Toivacuongsong.net'
     const currentUrl = options.url || `${baseUrl}${route.path}`
     const imageUrl = options.image || `${baseUrl}/default-og-image.jpg`
 

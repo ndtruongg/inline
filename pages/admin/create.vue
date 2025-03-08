@@ -213,7 +213,7 @@ onMounted(async () => {
 })
 
 // Base URL for canonical links - would normally come from config or env
-const baseUrl = 'https://tipshub.vn'
+const baseUrl = 'https://Toivacuongsong.vn'
 
 // Auto-generate slug when title changes
 watch(

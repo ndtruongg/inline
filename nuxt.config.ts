@@ -1,6 +1,6 @@
-import process from 'node:process'
+import process from "node:process";
 
-const isDev = process.env.NODE_ENV === 'development'
+const isDev = process.env.NODE_ENV === "development";
 
 // https://nuxt.com/docs/api/configuration/nuxt-config
 export default defineNuxtConfig({
@@ -34,11 +34,35 @@ export default defineNuxtConfig({
   },
 
   routeRules: {
-    '/': { ssr: true, prerender: true, ...(isDev ? {} : { cache: { swr: true, maxAge: 120 } }) },
-    '/admin/*': { ssr: false },
+    "/": {
+      ssr: true,
+      prerender: true,
+      ...(isDev ? {} : { cache: { swr: true, maxAge: 120 } }),
+    },
+    "/admin/*": { ssr: false },
     // NOTE: Work on both client-side and server-side
     // '/api/**': {
     //   proxy: `${process.env.API_ENDPOINT}/**`
     // }
+  },
+
+  runtimeConfig: {
+    apiProxyUrl: process.env.API_ENDPOINT,
+    githubToken: process.env.GITHUB_TOKEN,
+    githubRepo: process.env.GITHUB_REPO,
+    githubOwner: process.env.GITHUB_OWNER,
+    githubBranch: process.env.GITHUB_BRANCH,
+
+    public: {
+      firebase: {
+        apiKey: process.env.FIREBASE_API_KEY,
+        authDomain: process.env.FIREBASE_AUTH_DOMAIN,
+        projectId: process.env.FIREBASE_PROJECT_ID,
+        storageBucket: process.env.FIREBASE_STORAGE_BUCKET,
+        messagingSenderId: process.env.FIREBASE_MESSAGING_SENDER_ID,
+        appId: process.env.FIREBASE_APP_ID,
+        measurementId: process.env.FIREBASE_MEASUREMENT_ID,
+      },
+    },
   },
 });
