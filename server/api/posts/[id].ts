@@ -1,10 +1,15 @@
-export default defineEventHandler(async (event) => {
-  const id = Number(getRouterParam(event, 'id'))
-  const posts = await $fetch('/api/posts') // Gọi API lấy tất cả bài viết
+import { IPost } from "~/types";
 
-  const post = posts.find((p) => p.id === id)
+export default defineEventHandler(async (event) => {
+  const id = getRouterParam(event, "id");
+  const posts = await $fetch("/api/posts"); // Gọi API lấy tất cả bài viết
+
+  const post = posts.find((p: IPost) => p.slug === id);
   if (!post) {
-    throw createError({ statusCode: 404, statusMessage: 'Không tìm thấy bài viết' })
+    throw createError({
+      statusCode: 404,
+      statusMessage: "Không tìm thấy bài viết",
+    });
   }
-  return post
-})
+  return post;
+});

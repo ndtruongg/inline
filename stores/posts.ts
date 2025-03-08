@@ -1,22 +1,37 @@
 import { defineStore } from 'pinia'
 import usePost from '~/services/post'
-
-interface Post {
-  id: string;
-  [key: string]: any;
-}
+import type { IPost } from '~/types'
 
 export const usePostStore = defineStore('posts', () => {
-  const posts = ref<Post[]>([])
+  const postService = usePost()
+  const posts = ref<IPost[]>([])
+  const postDetail = ref<IPost | null>(null)
   const loading = ref(false)
   const error = ref<string | null>(null)
 
-  async function fetchPosts() {
-    const postService = usePost()
+  const fetchPosts = async () => {
     loading.value = true
     error.value = null
     try {
       posts.value = await postService.getAllPosts()
+      return posts.value
+    } catch (e) {
+      error.value = e instanceof Error ? e.message : 'An error occurred'
+      return []
+    } finally {
+      loading.value = false
+    }
+  }
+
+  const setPosts = (newPosts: IPost[]) => {
+    posts.value = newPosts
+  }
+
+  const fetchPostById = async (id: string) => {
+    loading.value = true
+    error.value = null
+    try {
+       postDetail.value = await postService.getPostById(id)
     } catch (e) {
       error.value = e instanceof Error ? e.message : 'An error occurred'
     } finally {
@@ -33,11 +48,14 @@ export const usePostStore = defineStore('posts', () => {
     posts,
     loading,
     error,
+    postDetail,
     // Actions
     fetchPosts,
+    fetchPostById,
+    setPosts,
     // Getters
     getPosts,
     isLoading,
-    getError
+    getError,
   }
 })

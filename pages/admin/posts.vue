@@ -47,6 +47,7 @@
               <th class="p-3 border">Title</th>
               <th class="p-3 border">Category</th>
               <th class="p-3 border">Status</th>
+              <th class="p-3 border">Featured</th>
               <th class="p-3 border">Actions</th>
             </tr>
           </thead>
@@ -68,6 +69,15 @@
                 >
                   {{ post.is_published ? 'Published' : 'Draft' }}
                 </span>
+              </td>
+              <td class="p-3 border">
+                <span 
+                  v-if="post.is_featured"
+                  class="bg-purple-100 text-purple-800 px-2 py-1 rounded text-sm"
+                >
+                  Featured
+                </span>
+                <span v-else class="text-gray-400">-</span>
               </td>
               <td class="p-3 border">
                 <div class="flex gap-2">
@@ -108,7 +118,7 @@
           <template v-for="page in paginationRange" :key="page">
             <button
               v-if="page !== '...'"
-              @click="goToPage(page)"
+              @click="goToPage(Number(page))"
               class="px-3 py-1 rounded border min-w-[32px] text-center"
               :class="currentPage === page ? 'bg-blue-500 text-white' : 'hover:bg-gray-100'"
             >

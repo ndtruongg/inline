@@ -23,17 +23,21 @@
             <div class="mb-4 flex justify-end gap-2">
               <button
                 @click="saveDraft"
-                class="flex items-center gap-1 rounded-md border border-gray-300 px-3 py-1 text-sm transition-colors hover:bg-gray-100"
+                :disabled="isSaving"
+                class="flex items-center gap-1 rounded-md border border-gray-300 px-3 py-1 text-sm transition-colors hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                <Icon name="ph:file-arrow-down" size="16px" />
-                Lưu nháp
+                <Icon v-if="!isSaving" name="ph:file-arrow-down" size="16px" />
+                <Icon v-else name="ph:spinner-gap" class="animate-spin" size="16px" />
+                {{ isSaving ? 'Đang lưu...' : 'Lưu nháp' }}
               </button>
               <button
                 @click="publish"
-                class="flex items-center gap-1 rounded-md bg-blue-500 px-3 py-1 text-sm text-white transition-colors hover:bg-blue-600"
+                :disabled="isPublishing"
+                class="flex items-center gap-1 rounded-md bg-blue-500 px-3 py-1 text-sm text-white transition-colors hover:bg-blue-600 disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                <Icon name="ph:paper-plane-right-fill" size="16px" />
-                Đăng bài
+                <Icon v-if="!isPublishing" name="ph:paper-plane-right-fill" size="16px" />
+                <Icon v-else name="ph:spinner-gap" class="animate-spin" size="16px" />
+                {{ isPublishing ? 'Đang đăng...' : 'Đăng bài' }}
               </button>
             </div>
 
@@ -93,15 +97,15 @@
               />
             </div>
             <div class="mb-4">
-              <label for="description" class="block text-sm font-medium text-gray-700">Mô tả</label>
+              <label for="excerpt" class="block text-sm font-medium text-gray-700">Mô tả</label>
               <textarea
-                id="description"
-                v-model="description"
+                id="excerpt"
+                v-model="excerpt"
                 rows="3"
                 placeholder="Tóm tắt ngắn về bài viết (khuyến nghị 150-160 ký tự)"
                 class="mt-1 block w-full resize-none rounded-md border border-gray-200 px-3 py-2 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500"
               ></textarea>
-              <p class="mt-1 text-xs text-gray-500">{{ description.length }}/160 ký tự</p>
+              <p class="mt-1 text-xs text-gray-500">{{ excerpt.length }}/160 ký tự</p>
             </div>
             <div class="mb-4">
               <label for="keywords" class="block text-sm font-medium text-gray-700">Từ khóa</label>
@@ -132,6 +136,20 @@
               <p class="mt-1 text-xs text-gray-500">
                 Slug được tự động tạo từ tiêu đề và được sử dụng trong URL.
               </p>
+            </div>
+            <div class="mb-4">
+              <div class="flex items-center">
+                <input
+                  type="checkbox"
+                  id="isFeatured"
+                  v-model="isFeatured"
+                  class="h-4 w-4 rounded border-gray-300 text-blue-500 focus:ring-blue-500"
+                />
+                <label for="isFeatured" class="ml-2 block text-sm font-medium text-gray-700">
+                  Bài viết nổi bật
+                </label>
+              </div>
+              <p class="mt-1 text-xs text-gray-500">Bài viết sẽ được hiển thị ở vị trí đặc biệt trên trang chủ.</p>
             </div>
             <div class="mb-4">
               <label for="canonicalUrl" class="block text-sm font-medium text-gray-700"
@@ -186,10 +204,13 @@ const showSetting = ref(true)
 const featureImageUrl = ref<string | null>(null)
 const title = ref('')
 const slug = ref('')
-const description = ref('')
+const excerpt = ref('')
 const keywords = ref('')
 const canonicalUrl = ref('')
 const bodyContent = ref('')
+const isSaving = ref(false)
+const isPublishing = ref(false)
+const isFeatured = ref(false)
 
 // Categories
 const categories = ref<Category[]>([])
@@ -213,7 +234,7 @@ onMounted(async () => {
 })
 
 // Base URL for canonical links - would normally come from config or env
-const baseUrl = 'https://Toivacuongsong.vn'
+const baseUrl = 'https://ToivaCuocsong.vn'
 
 // Auto-generate slug when title changes
 watch(
@@ -259,18 +280,21 @@ const saveDraft = async () => {
       return
     }
 
+    isSaving.value = true
     const now = new Date().toISOString()
     const data = {
       title: title.value,
+      excerpt: excerpt.value,
       body: bodyContent.value,
       slug: slug.value,
-      description: description.value,
       keywords: keywords.value,
       feature_image: featureImageUrl.value,
       category_id: selectedCategoryId.value,
       is_published: false,
       created_at: now,
-      updated_at: now
+      updated_at: now,
+      deleted_at: null,
+      is_featured: isFeatured.value
     }
 
     await postService.createPost(data)
@@ -278,6 +302,8 @@ const saveDraft = async () => {
   } catch (error) {
     console.error('Error saving draft:', error)
     toast.error('Không thể lưu bản nháp. Vui lòng thử lại sau.', 'Lỗi')
+  } finally {
+    isSaving.value = false
   }
 }
 
@@ -294,18 +320,21 @@ const publish = async () => {
       return
     }
 
+    isPublishing.value = true
     const now = new Date().toISOString()
     const data = {
       title: title.value,
       slug: slug.value,
       body: bodyContent.value,
-      description: description.value,
+      excerpt: excerpt.value,
       keywords: keywords.value,
       feature_image: featureImageUrl.value,
       category_id: selectedCategoryId.value,
       is_published: true,
       created_at: now,
-      updated_at: now
+      updated_at: now,
+      deleted_at: null,
+      is_featured: isFeatured.value
     }
 
     await postService.createPost(data)
@@ -313,17 +342,20 @@ const publish = async () => {
     // Reset form after successful submission
     title.value = ''
     slug.value = ''
-    description.value = ''
+    excerpt.value = ''
     keywords.value = ''
     canonicalUrl.value = ''
     featureImageUrl.value = null
     selectedCategoryId.value = ''
     bodyContent.value = ''
+    isFeatured.value = false
     
     toast.success('Bài viết đã được đăng thành công', 'Thành công')
   } catch (error) {
     console.error('Error publishing post:', error)
     toast.error('Không thể đăng bài viết. Vui lòng thử lại sau.', 'Lỗi')
+  } finally {
+    isPublishing.value = false
   }
 }
 </script>

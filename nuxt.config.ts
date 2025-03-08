@@ -14,14 +14,12 @@ export default defineNuxtConfig({
     },
   },
 
-  pinia: {
-    autoImports: ["defineStore", "storeToRefs"],
-  },
   experimental: {
     viewTransition: true,
   },
 
   app: {
+    pageTransition: { name: 'page', mode: 'out-in' },
     head: {
       charset: "utf-8",
       viewport: "width=device-width, initial-scale=1",

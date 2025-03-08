@@ -8,6 +8,7 @@ export default function usePost() {
   }
 
   const getPostById = async (id) => {
+    console.log(id)
     const response = await fetch(`/api/posts/${id}`);
     if (!response.ok) {
       throw new Error('Failed to fetch post');
