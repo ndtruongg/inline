@@ -6,7 +6,14 @@ const isDev = process.env.NODE_ENV === "development";
 export default defineNuxtConfig({
   compatibilityDate: "2024-11-01",
   devtools: { enabled: true },
-  modules: ["@pinia/nuxt", "@nuxtjs/tailwindcss", "@nuxt/image", "@nuxt/icon"],
+  modules: [
+    "@pinia/nuxt",
+    "@nuxtjs/tailwindcss",
+    "@nuxt/image",
+    "@nuxt/icon",
+    "@nuxtjs/sitemap",
+    "@nuxtjs/robots",
+  ],
   postcss: {
     plugins: {
       tailwindcss: {},
@@ -19,7 +26,7 @@ export default defineNuxtConfig({
   },
 
   app: {
-    pageTransition: { name: 'page', mode: 'out-in' },
+    pageTransition: { name: "page", mode: "out-in" },
     head: {
       charset: "utf-8",
       viewport: "width=device-width, initial-scale=1",
@@ -42,6 +49,26 @@ export default defineNuxtConfig({
     // '/api/**': {
     //   proxy: `${process.env.API_ENDPOINT}/**`
     // }
+  },
+
+  site: {
+    url: process.env.PUBLIC_SITE_URL,
+    name: "My Awesome Website",
+  },
+
+  sitemap: {
+    sources: [`${process.env.PUBLIC_SITE_URL}/sitemap.xml`],
+    exclude: ["/admin/**", "/example"],
+    defaults: {
+      lastmod: new Date().toISOString(),
+      priority: 0.5,
+      changefreq: "weekly",
+    },
+  },
+
+  robots: {
+    sitemap: `${process.env.PUBLIC_SITE_URL || 'https://toivacuocsong.com'}/sitemap.xml`,
+    disallow: ["/admin/**", "/example"],
   },
 
   runtimeConfig: {
